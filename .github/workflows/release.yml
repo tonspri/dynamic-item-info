@@ -1,0 +1,40 @@
+name: Validate and publish mod
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/check-package.cjs
+      - run: node scripts/build-release.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dynamic-item-info-release
+          path: dist/*
+  publish:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dynamic-item-info-release
+          path: dist
+      - name: Publish the checked commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version=$(node -p 'require("./mod/mod.json").version')
+          gh release create "v$version" dist/* --target "$GITHUB_SHA" --title "Dynamic Item Info v$version" --notes-file "RELEASE-NOTES-v$version.md" --latest

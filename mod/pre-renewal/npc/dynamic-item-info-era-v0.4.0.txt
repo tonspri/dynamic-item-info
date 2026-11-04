@@ -1,0 +1,7 @@
+//===== Dynamic Item Info v0.4.0: which era this world is (generated) =====
+-	script	DynamicItemInfoEra	-1,{
+	end;
+OnInit:
+	$@DII_era$ = "pre-renewal";
+	end;
+}

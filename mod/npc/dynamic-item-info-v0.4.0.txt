@@ -1,0 +1,87 @@
+//===== Dynamic Item Info v0.4.0 ===========================================
+//= Server side of the item windows (client/index.js). It only reads.
+//=
+//= Requests, from api.server.request('dii', ...):
+//=   @dii <n> item <id>  -> ok|<era>|<group>|<base level>|<type>|<subtype>|<atk>
+//=                          |<matk>|<def>|<weight>|<weapon lv>|<armor lv>|<min lv>|<max lv>
+//=   @dii <n> own <id> <refine> <grade> <options> <card1> <card2> <card3> <card4>
+//=                       -> ok|<carried>|<equipped>|<tradable>|<bound: -1 none carried, 9 mixed>
+//=                          A card of -1 means any cards.
+//= Anything refused answers err|<message>. Level 0, so every check is here.
+//===========================================================================
+-	script	DynamicItemInfo	-1,{
+	end;
+
+OnInit:
+	bindatcmd "dii", strnpcinfo(3) + "::OnRequest", 0, 99;
+	end;
+
+OnRequest:
+	.@req = atoi(.@atcmd_parameters$[0]);
+	if (.@req <= 0)
+		end;
+	.@out$ = "err|Unknown request.";
+	if (.@atcmd_parameters$[1] == "item")
+		.@out$ = callsub(S_Item, atoi(.@atcmd_parameters$[2]));
+	else if (.@atcmd_parameters$[1] == "own")
+		.@out$ = callsub(S_Own, atoi(.@atcmd_parameters$[2]), atoi(.@atcmd_parameters$[3]), atoi(.@atcmd_parameters$[4]), atoi(.@atcmd_parameters$[5]), atoi(.@atcmd_parameters$[6]), atoi(.@atcmd_parameters$[7]), atoi(.@atcmd_parameters$[8]), atoi(.@atcmd_parameters$[9]));
+	dispbottom "@@reply " + .@req + " 1/1 " + .@out$;
+	end;
+
+// S_Item(id) -> reply text
+S_Item:
+	.@id = getarg(0);
+	// getiteminfo answers -1 for an unknown id, and the window should show nothing rather than that.
+	if (.@id <= 0 || getitemname(.@id) == "null")
+		return "err|No such item.";
+	if (getstrlen($@DII_era$) == 0)
+		return "err|The era script did not load.";
+	.@type = getiteminfo(.@id, ITEMINFO_TYPE);
+	.@group$ = "other";
+	if (.@type == IT_WEAPON)
+		.@group$ = "weapon";
+	else if (.@type == IT_ARMOR)
+		.@group$ = "armor";
+	return "ok|" + $@DII_era$ + "|" + .@group$ + "|" + BaseLevel + "|" + .@type
+		+ "|" + getiteminfo(.@id, ITEMINFO_SUBTYPE)
+		+ "|" + getiteminfo(.@id, ITEMINFO_ATTACK)
+		+ "|" + getiteminfo(.@id, ITEMINFO_MAGICATTACK)
+		+ "|" + getiteminfo(.@id, ITEMINFO_DEFENSE)
+		+ "|" + getiteminfo(.@id, ITEMINFO_WEIGHT)
+		+ "|" + getiteminfo(.@id, ITEMINFO_WEAPONLEVEL)
+		+ "|" + getiteminfo(.@id, ITEMINFO_ARMORLEVEL)
+		+ "|" + getiteminfo(.@id, ITEMINFO_EQUIPLEVELMIN)
+		+ "|" + getiteminfo(.@id, ITEMINFO_EQUIPLEVELMAX);
+
+// S_Own(id, refine, grade, options, card1..card4) -> reply text
+S_Own:
+	.@id = getarg(0);
+	if (.@id <= 0 || getitemname(.@id) == "null")
+		return "err|No such item.";
+	.@bound = -1;
+	getinventorylist;
+	for (.@i = 0; .@i < @inventorylist_count; .@i++) {
+		if (@inventorylist_id[.@i] != .@id || @inventorylist_refine[.@i] != getarg(1) || @inventorylist_enchantgrade[.@i] != getarg(2))
+			continue;
+		.@options = 0;
+		if (@inventorylist_option_id1[.@i]) .@options++;
+		if (@inventorylist_option_id2[.@i]) .@options++;
+		if (@inventorylist_option_id3[.@i]) .@options++;
+		if (@inventorylist_option_id4[.@i]) .@options++;
+		if (@inventorylist_option_id5[.@i]) .@options++;
+		if (.@options != getarg(3))
+			continue;
+		if (getarg(4) >= 0 && (@inventorylist_card1[.@i] != getarg(4) || @inventorylist_card2[.@i] != getarg(5) || @inventorylist_card3[.@i] != getarg(6) || @inventorylist_card4[.@i] != getarg(7)))
+			continue;
+		.@copies += @inventorylist_amount[.@i];
+		if (@inventorylist_equip[.@i])
+			.@worn += @inventorylist_amount[.@i];
+		if (@inventorylist_tradable[.@i])
+			.@tradable += @inventorylist_amount[.@i];
+		if (.@bound == -1)
+			.@bound = @inventorylist_bound[.@i];
+		else if (.@bound != @inventorylist_bound[.@i])
+			.@bound = 9;
+	}
+	return "ok|" + .@copies + "|" + .@worn + "|" + .@tradable + "|" + .@bound;
+}
