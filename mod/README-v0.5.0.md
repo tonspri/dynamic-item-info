@@ -1,6 +1,6 @@
-# Dynamic Item Info v0.4.0
+# Dynamic Item Info v0.5.0
 
-Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. Renewal and pre-renewal.
+Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status and Skill Tree get the same look, with search, sort, a list view, a weight bar and a light or midnight theme. Renewal and pre-renewal.
 
 ## How to use it
 Enable the mod, restart the game, then open any item's information as usual. There is nothing else to set up.
@@ -12,6 +12,14 @@ Enable the mod, restart the game, then open any item's information as usual. The
 - **Full description** at the bottom shows the game's original text. The window remembers your choice. It opens by itself on items whose text has a map link, so the link stays one click away.
 - **Cards** in slots list their effects. Click a card to fold it, or right-click it to read the card itself.
 - **Compared with equipped**: when the game opens its comparison window, the item you're inspecting gets a section comparing base values and refine with your equipped item, and the difference beside its main number. The comparison window itself gets the same look and is marked Equipped. If the window doesn't open, turn on item comparison in the game's inventory options.
+
+## The game's windows in the same look
+- **Inventory (Alt+E)**: tabs on top, rounded slots, search (Esc clears it, game keys pause while you type), sort by Game order, Type, Name or Newest, a list view with names and weights, a weight bar with zeny (orange at 50%, red at 90%), and a hover label with name, count and weight. Resize from the bottom-right corner; the size is remembered.
+- **Equipment (Alt+Q)**: pill tabs, worn items on rounded cards and named empty slots.
+- **Status**: stat names drawn as text on a clean panel and round + buttons.
+- **Skill Tree (Alt+S)**: pill tabs along the top and rounded skill cells, with raisable skills tinted.
+- **Light or midnight**: the moon and sun button in the Inventory switches every window.
+- Every click, drag and button works as in the game: using, equipping, dragging to hotkeys, right-click info, raising stats and skills. Each window can be turned back to the game's own in Settings.
 
 ## How it reads items
 The sections come from what the game already shows in the window, plus a small read-only server command for base values and your level. A line it can't place stays readable as plain text. If the server doesn't answer, the window still shows everything from the item's description.
@@ -27,3 +35,6 @@ The sections come from what the game already shows in the window, plus a small r
 - Items are recognized by matching their name and description, so an unidentified item, or one your client's text doesn't match, shows only its description.
 - Requirements and details are recognized from English item text. With another language, more lines appear as plain text.
 - If the mod hits a problem with an item, that window goes back to the game's normal look.
+- The new windows apply to the windows of the app's default client version (Inventory from 2018, Status from 2020, Equipment from 2022). With an older client version chosen in Settings, those windows keep the game's look.
+- Buttons whose words are part of a picture (Apply, Reset, the equip switch buttons) stay the game's own.
+- Weight per item comes from the item description; an item without a weight line shows none.

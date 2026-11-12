@@ -1,12 +1,42 @@
 {
   "name": "dynamic-item-info",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": "DaggerHashimoto",
-  "description": "Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. Renewal and pre-renewal.",
+  "description": "Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status and Skill Tree get the same look, with search, sort, a list view, a weight bar and a light or midnight theme. Renewal and pre-renewal.",
   "requires": {
     "app": ">=1.7.4",
     "era": "any"
   },
   "renewalFolder": "renewal",
-  "prerenewalFolder": "pre-renewal"
+  "prerenewalFolder": "pre-renewal",
+  "settings": [
+    {
+      "key": "inventory",
+      "type": "boolean",
+      "default": true,
+      "label": "New Inventory window",
+      "description": "Turn off to keep the game's own Inventory."
+    },
+    {
+      "key": "equipment",
+      "type": "boolean",
+      "default": true,
+      "label": "New Equipment and Status windows",
+      "description": "Turn off to keep the game's own Equipment (Alt+Q) and Status windows."
+    },
+    {
+      "key": "skills",
+      "type": "boolean",
+      "default": true,
+      "label": "New Skill Tree window",
+      "description": "Turn off to keep the game's own Skill Tree (Alt+S)."
+    },
+    {
+      "key": "dark",
+      "type": "boolean",
+      "default": false,
+      "label": "Start in the midnight theme",
+      "description": "The moon and sun button in the Inventory switches the theme of every window any time and remembers your choice."
+    }
+  ]
 }

@@ -1,4 +1,6 @@
-// Dynamic Item Info v0.4.0: a structured look for the client's own item windows.
+// Dynamic Item Info v0.5.0: a structured look for the client's own item windows,
+// and the Inventory, Equipment, Status and Skill Tree in the same look (windows.js).
+import gameWindows from './windows.js';
 // ItemInfo and ItemCompare keep every stock element and all their behaviour; this
 // adds one layer inside them and hides what it replaces. It only reads what the
 // client has already put in the window, so it works on an item anywhere: bag,
@@ -319,6 +321,7 @@ const statHtml = row => `<div class="dii-row${row.soft ? ' soft' : ''}${row.valu
 const section = (title, html) => html ? `<section class="dii-sec"><h4>${escape(title)}</h4>${html}</section>` : '';
 
 export default function init(parameters, api) {
+    const stopWindows = gameWindows(parameters, api);
     if (api?.version !== 1) throw new Error('Dynamic Item Info requires client API 1');
     const windows = new Map();
     const cardIds = new Map();
@@ -624,5 +627,5 @@ export default function init(parameters, api) {
     api.on('connection', () => { serverItems.clear(); refused.clear(); owned.clear(); characterLevel = null; levelAt = 0; });
     api.on('ui:append', attach);
     api.on('ui:remove', detach);
-    return () => { for (const view of [...windows.values()]) detach(view); };
+    return () => { stopWindows(); for (const view of [...windows.values()]) detach(view); };
 }
