@@ -1,3 +1,8 @@
+# v0.6.0
+- Party and Friends, and Guild, in the same look as the Inventory.
+- Every other game window gets the blue title bar, round close button, rounded frame and slim scrollbar.
+- New setting to keep the game's own Party, Guild and other windows.
+
 # v0.5.0
 - The Inventory (Alt+E) is rebuilt in the item window's look: tabs on top, rounded slots, search, sort, list view, weight bar with zeny, hover label and resize grip.
 - Equipment (Alt+Q), Status and Skill Tree (Alt+S) in the same look.

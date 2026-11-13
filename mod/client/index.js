@@ -1,5 +1,5 @@
-// Dynamic Item Info v0.5.0: a structured look for the client's own item windows,
-// and the Inventory, Equipment, Status and Skill Tree in the same look (windows.js).
+// Dynamic Item Info v0.6.0: a structured look for the client's own item windows,
+// and the game's other windows in the same look (windows.js, skins.js).
 import gameWindows from './windows.js';
 // ItemInfo and ItemCompare keep every stock element and all their behaviour; this
 // adds one layer inside them and hides what it replaces. It only reads what the

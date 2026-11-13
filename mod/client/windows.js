@@ -1,4 +1,4 @@
-import { EQUIPMENT, STATUS, SKILLS } from './skins.js';
+import { EQUIPMENT, STATUS, SKILLS, PARTY, GUILD, GENERIC, GENERIC_WINDOWS } from './skins.js';
 
 // Dynamic Item Info: the game's own windows in the same look as the item window.
 // A new Inventory, plus Equipment, Status and Skill Tree.
@@ -455,46 +455,56 @@ export default function windows(parameters, api) {
         repaintWeights();
     }
 
-    // Equipment, Status and Skill Tree: one stylesheet each, in the Inventory's theme.
-    const SKINS = { EquipmentV4: { setting: 'equipment', css: EQUIPMENT, root: '#EquipmentV4' }, WinStatsV2: { setting: 'equipment', css: STATUS, root: '#WinStats' }, SkillListV2: { setting: 'skills', css: SKILLS, root: '#SkillListV2' } };
-    const skinned = new Map(); // host -> { style, win }
+    // Every other game window: one stylesheet each, in the Inventory's theme. A
+    // window is known by its root element's id, which the client's own template sets.
+    const SKINS = {
+        EquipmentV4: { setting: 'equipment', css: EQUIPMENT, classes: ['sw'] },
+        WinStats: { setting: 'equipment', css: STATUS, classes: ['sw'] },
+        SkillListV2: { setting: 'skills', css: SKILLS, classes: ['sw'] },
+        PartyFriends: { setting: 'others', css: PARTY, classes: ['sw'] },
+        Guild: { setting: 'others', css: GUILD, classes: ['sw'] },
+    };
+    const plain = { setting: 'others', css: GENERIC, classes: ['swg'] };
+    const specFor = id => SKINS[id] || (GENERIC_WINDOWS.has(id) ? plain : null);
+    // The client puts each window inside a div.ui-component-root in the shadow root.
+    const rootOf = component => { const box = component.root?.querySelector?.('.ui-component-root') || component.root; return [...(box?.children || [])].find(node => node.id) || null; };
+    const skinned = new Map(); // host -> { style, win, classes }
     function retheme() { for (const { win } of skinned.values()) win.classList.toggle('sw-dark', prefs.dark); }
     function skin(component) {
-        const spec = SKINS[component.name], win = component.root?.querySelector?.(spec.root);
-        if (!win || skinned.has(component.host)) return;
+        const win = rootOf(component), spec = win && specFor(win.id);
+        if (!spec || parameters?.[spec.setting] === false || skinned.has(component.host)) return;
         const style = document.createElement('style');
-        style.dataset.diiWindows = component.name;
+        style.dataset.diiWindows = win.id;
         style.textContent = spec.css;
         component.root.append(style);
-        win.classList.add('sw');
-        skinned.set(component.host, { style, win });
+        win.classList.add(...spec.classes);
+        skinned.set(component.host, { style, win, classes: spec.classes });
         retheme();
     }
     function unskin(component) {
         const entry = skinned.get(component.host);
         if (!entry) return;
         entry.style.remove();
-        entry.win.classList.remove('sw', 'sw-dark');
+        entry.win.classList.remove(...entry.classes, 'sw-dark');
         if (!entry.win.classList.length) entry.win.removeAttribute('class');
         skinned.delete(component.host);
     }
-    const wanted = name => name === 'InventoryV3' ? parameters?.inventory !== false : SKINS[name] ? parameters?.[SKINS[name].setting] !== false : false;
 
     api.on('ui:append', component => {
-        if (component.name === 'InventoryV3') { if (wanted('InventoryV3')) mount(component); }
-        else if (SKINS[component.name]) { if (wanted(component.name)) skin(component); }
+        if (component.name === 'InventoryV3') { if (parameters?.inventory !== false) mount(component); }
         else if (/^BasicInfo/.test(component.name)) bindBasic(component);
+        else skin(component);
     });
     api.on('ui:remove', component => {
         if (component.name === 'InventoryV3') unmount(component);
-        else if (SKINS[component.name]) unskin(component);
         else if (basic && component.host === basic.host) { basicWatch?.disconnect(); basicWatch = null; basic = null; repaintWeights(); }
+        else unskin(component);
     });
 
     return () => {
         for (const entry of mounted.values()) entry.unmount();
         mounted.clear();
-        for (const { style, win } of skinned.values()) { style.remove(); win.classList.remove('sw', 'sw-dark'); }
+        for (const { style, win, classes } of skinned.values()) { style.remove(); win.classList.remove(...classes, 'sw-dark'); }
         skinned.clear();
         basicWatch?.disconnect();
         basic = null;

@@ -159,3 +159,85 @@ ${K} .footer .text { font-weight: 600; }
 ${K} .footer .skpoints_count { color: var(--blue-deep); }
 ${K} .footer .btn { border-radius: 5px; }
 `;
+
+// Party and Friends.
+const P = '#PartyFriends.sw';
+export const PARTY = THEME + frame(P) + titlebar(P, 22) + `
+${P} .titlebar .party, ${P} .titlebar .friend { width: auto; height: auto; color: #fff; font: 600 12px "Segoe UI", sans-serif; text-shadow: 0 1px 2px rgba(20,30,90,.6); vertical-align: 0; }
+${P} .titlebar .partyname { margin-left: 6px; font-weight: 400; opacity: .9; }
+${P} .content { margin: 6px 6px 0; border-radius: 10px; background: var(--panel) !important; box-shadow: inset 0 0 0 1px var(--panel-ring); }
+${P} .content .party.info-v2 .node { margin: 2px 3px; border-radius: 8px; background: transparent; transition: background .14s ease; }
+${P} .content .party.info-v2 .node:hover, ${P} .content .node .selection { background: var(--pick); }
+${P} .content .party.info-v2 .node.detached { background: var(--slot); }
+${P} .content .party.info-v2 .node .name, ${P} .content .friend .node .name { color: var(--ink); }
+${P} .content .party.info-v2 .node .level { color: var(--gold-ink); }
+${P} .content .party.info-v2 .node .map, ${P} .content .party.info-v2 .node .hp { color: var(--soft); }
+${P} .content .party.info-v2 .node .job-icon-container { border: 0; border-radius: 7px; background: var(--chip); box-shadow: inset 0 0 0 1px var(--panel-ring); }
+${P} .content .party.info-v2 .node .hp-bar-container { border: 0; border-radius: 9px; background: rgba(60,62,100,.3); }
+${P} .content .friend .node { border-radius: 6px; }
+${P} .navigation { width: auto; height: 24px; margin: 6px; padding: 2px 4px; box-sizing: border-box; border-radius: 9px; background: var(--chip) !important; box-shadow: inset 0 0 0 1px var(--panel-ring); }
+${P} .navigation > ui-image { display: none; }
+${P} .navigation ui-button { border-radius: 6px; transition: transform .13s ease, filter .13s ease; }
+${P} .navigation ui-button:hover { transform: translateY(-1px); filter: brightness(1.1); }
+${P} .navigation ui-button .overlay { top: -28px; height: auto; padding: 4px 8px; border-radius: 8px; background: var(--label); color: var(--label-ink); text-shadow: none; }
+${P} .footer { background: none !important; height: 26px; }
+${P} .footer > ui-image, ${P} .footer .switchtab ui-image { display: none; }
+${P} .footer .party, ${P} .footer .friend { display: flex; align-items: center; gap: 4px; padding: 0 0 0 6px; height: 22px; }
+${P} .footer .switchtab { height: 20px; padding: 0 11px; border-radius: 99px; background: var(--chip) !important; color: var(--chip-ink); font: 600 11px "Segoe UI", sans-serif; cursor: pointer; }
+${P} .footer .switchtab.on { background: var(--accent) !important; color: var(--accent-ink); }
+${P} .footer .member-count-container .footer-label { color: var(--soft); }
+${P} .footer .member-count-container .count-box { border-radius: 99px; background: var(--accent) !important; }
+`;
+
+// Guild: a fixed 400 by 317 window, so every part keeps its size.
+const D = '#Guild.sw';
+export const GUILD = THEME + frame(D) + titlebar(D, 17) + `
+${D} .titlebar::before { content: "Guild"; flex: 1; color: #fff; font: 600 12px "Segoe UI", sans-serif; text-shadow: 0 1px 2px rgba(20,30,90,.6); }
+${D} .tabs { display: flex; gap: 3px; padding: 2px 4px 0; box-sizing: border-box; background: transparent; }
+${D} .tabs button { width: 62px; height: 20px; margin: 0; padding: 0 5px; border-radius: 99px; background: var(--chip); color: var(--chip-ink); font: 600 11px "Segoe UI", sans-serif; text-align: center; box-shadow: 0 1px 3px rgba(60,70,150,.15); cursor: pointer; }
+${D} .tabs button:hover { background: var(--chip-hover); }
+${D} .tabs button.active { background: var(--accent); color: var(--accent-ink); }
+${D} .tabs button.denied { opacity: .5; }
+${D} .panel { background: var(--panel); box-shadow: inset 0 1px 0 var(--panel-ring); color: var(--ink); }
+${D} .content .value, ${D} .content .numMember, ${D} .content .maxMember { font-weight: 600; }
+${D} .content th { background: var(--chip); color: var(--soft); font-weight: 600 !important; }
+${D} .content th, ${D} .content td, ${D} .content tr { border-color: rgba(120,138,205,.22) !important; }
+${D} .content.members tr.online td { background: rgba(95,174,95,.13); }
+${D} .content.members tr.active td { background: var(--pick) !important; }
+${D} .content input, ${D} .content textarea, ${D} .content select { border: 0; border-radius: 6px; background: var(--chip); color: var(--ink); box-shadow: inset 0 0 0 1px var(--panel-ring); }
+${D} .footer { background: none !important; color: var(--ink); }
+${D} .footer > ui-image { display: none; }
+${D} .footer .skpoints_count { color: var(--blue-deep); font-weight: 600; }
+${D} .emblem_drop { border-color: var(--blue); border-radius: 14px; background: var(--panel); }
+${D} .ally_list, ${D} .hostile_list, ${D} .emblem_container { border: 0 !important; border-radius: 8px; background: var(--chip) !important; box-shadow: inset 0 0 0 1px var(--panel-ring); }
+`;
+
+// Every other client window: only the frame and title bar, so nothing inside moves.
+// Their insides are the game's own pictures, so they stay light in the midnight theme.
+export const GENERIC = `
+.swg { --title: linear-gradient(90deg, #4f74d6, #7b9cec 55%, #b7a4ec); --ring: #8ea3dd; border-radius: 10px !important; box-shadow: 0 0 0 1px var(--ring), 0 8px 24px rgba(36,44,96,.35) !important; }
+.swg.sw-dark { --title: linear-gradient(90deg, #2b3170, #3d3a80 55%, #5a3f78); --ring: #4b4f8f; }
+.swg .titlebar { background: var(--title) !important; border-radius: 10px 10px 0 0 !important; color: #fff !important; text-shadow: 0 1px 2px rgba(20,30,90,.6) !important; }
+.swg .titlebar > ui-image { display: none; }
+.swg .titlebar .text, .swg .titlebar ui-text, .swg .titlebar .left > span { color: #fff !important; text-shadow: 0 1px 2px rgba(20,30,90,.6) !important; }
+.swg .titlebar .left .base { visibility: hidden; }
+.swg .titlebar .right .base { position: relative; border-radius: 50%; background: rgba(255,255,255,.25) !important; cursor: pointer; }
+.swg .titlebar .right .base:hover { background: rgba(255,255,255,.45) !important; }
+.swg .titlebar .close::before, .swg .titlebar .mini::before { position: absolute; inset: 0; color: #fff; font: 700 10px/11px "Segoe UI", sans-serif; text-align: center; }
+.swg .titlebar .close::before { content: "\\00d7"; }
+.swg .titlebar .mini::before { content: "\\2013"; }
+.swg .ro-custom-scrollbar { width: 8px !important; }
+.swg .ro-custom-scrollbar .btn-up, .swg .ro-custom-scrollbar .btn-down { height: 6px; background: none !important; }
+.swg .ro-custom-scrollbar .track { background: none !important; }
+.swg .ro-custom-scrollbar .thumb { background: #8a8db8 !important; border: 0 !important; border-radius: 9px; opacity: .6; }
+`;
+
+// The client's window roots that get the plain frame. The windows with their own look
+// above, the Inventory and Dynamic Item Info's item windows are left out, and so are
+// the windows whose titlebar element wraps the whole window (Quest, Quest info,
+// attendance, party helper, NPC shop) or that have none at the top.
+export const GENERIC_WINDOWS = new Set(`Bank CaptchaAnswer CaptchaPreview CaptchaSelector CaptchaUpload CardIllustration CashShop ChatBoxSettings ChatRoom ChatRoomCreate Clan ConvertItems
+    Emoticons Enchant EnchantGrade EquipmentV0 EquipmentV1 EquipmentV2 EquipmentV3 FPS GraphicsOption GuildCompanion InventoryV0 InventoryV1
+    InventoryV2 ItemListWindowSelection ItemPreview ItemReform LaphineSys LaphineUpg Mail MakeModelMessage MakeReadBook MemorialDungeon PetEvolution PetInformations
+    Pincodewindow ReadMail ReadRodex Refine Reputation Rodex Roulette ShortCutOption ShortCuts SoundOption Storage StorageFilter
+    Stylist SwitchEquip Trade VendingModelMessage VendingReport WorldMap WriteRodex cartdecoration cartitems changecart vending vendingshop`.split(/\s+/).filter(Boolean));

@@ -1,8 +1,8 @@
 {
   "name": "dynamic-item-info",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "DaggerHashimoto",
-  "description": "Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status and Skill Tree get the same look, with search, sort, a list view, a weight bar and a light or midnight theme. Renewal and pre-renewal.",
+  "description": "Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status, Skill Tree, Party and Guild get the same look, with search, sort, a list view, a weight bar and a light or midnight theme, and every other game window gets the matching title bar and frame. Renewal and pre-renewal.",
   "requires": {
     "app": ">=1.7.4",
     "era": "any"
@@ -30,6 +30,13 @@
       "default": true,
       "label": "New Skill Tree window",
       "description": "Turn off to keep the game's own Skill Tree (Alt+S)."
+    },
+    {
+      "key": "others",
+      "type": "boolean",
+      "default": true,
+      "label": "New Party, Guild and other windows",
+      "description": "Party and Guild in the new look, and the blue title bar and rounded frame on every other game window. Turn off to keep the game's own."
     },
     {
       "key": "dark",
