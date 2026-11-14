@@ -22,6 +22,7 @@ const check = async (label, fn) => { await fn(); results.push(label); };
     fs.copyFileSync(path.join(mod, 'client/index.js'), copy);
     fs.writeFileSync(path.join(scratch, 'package.json'), '{"type":"module"}');
     for (const file of ['windows.js', 'skins.js']) fs.copyFileSync(path.join(mod, 'client', file), path.join(scratch, file));
+    fs.copyFileSync(path.join(mod, 'client/jobs.json'), path.join(scratch, 'jobs.json'));
     const plugin = await import('file:///' + copy.replace(/\\/g, '/'));
 
     await check('manifest: name, era folders and the files of this version', () => {
@@ -29,7 +30,7 @@ const check = async (label, fn) => { await fn(); results.push(label); };
         for (const [folder, era] of [[manifest.renewalFolder, 'renewal'], [manifest.prerenewalFolder, 'pre-renewal']])
             assert(read(`${folder}/npc/dynamic-item-info-era-v${VERSION}.txt`).includes(`$@DII_era$ = "${era}";`));
         assert(fs.existsSync(`RELEASE-NOTES-v${VERSION}.md`));
-        assert.deepEqual(manifest.settings.map(s => s.key), ['inventory', 'equipment', 'skills', 'others', 'dark']);
+        assert.deepEqual(manifest.settings.map(s => s.key), ['inventory', 'equipment', 'skills', 'basic', 'others', 'dark']);
         assert.equal(typeof plugin.default, 'function');
     });
 

@@ -1,7 +1,7 @@
-import { EQUIPMENT, STATUS, SKILLS, PARTY, GUILD, GENERIC, GENERIC_WINDOWS } from './skins.js';
+import { EQUIPMENT, STATUS, SKILLS, PARTY, GUILD, GENERIC, GENERIC_WINDOWS, BASICINFO, NPCSTORE, FPS } from './skins.js';
 
 // Dynamic Item Info: the game's own windows in the same look as the item window.
-// A new Inventory, plus Equipment, Status and Skill Tree.
+// A new Inventory, plus Equipment, Status, Skill Tree, Party, Guild and Basic Info.
 //
 // The window is rebuilt around the client's own item slots. The client keeps
 // drawing every item into .content and keeps every handler on it (double-click
@@ -103,6 +103,19 @@ const CSS = `
     background: var(--field); color: var(--chip-ink); font: 600 11px "Segoe UI", sans-serif; cursor: pointer; box-shadow: inset 0 0 0 1px var(--panel-ring); transition: background .15s ease, color .15s ease; }
 #InventoryV3.sw .sw-btn:hover { background: var(--chip-hover); color: var(--blue-deep); }
 #InventoryV3.sw .sw-btn[aria-pressed="true"] { color: var(--blue-deep); }
+
+/* Theme toggle: a sky-toned pill, sun and moon always both visible, a sliding knob. */
+#InventoryV3.sw .sw-theme { position: relative; width: 44px; height: 24px; min-width: 44px; padding: 0; border: 0; border-radius: 99px; cursor: pointer;
+    background: linear-gradient(90deg, #bcd4ff, #fde3b0); box-shadow: inset 0 1px 3px rgba(60,70,150,.25); transition: background .25s ease; }
+#InventoryV3.sw.sw-dark .sw-theme { background: linear-gradient(90deg, #1b1f45, #2d2a5e); }
+#InventoryV3.sw .sw-theme-sun, #InventoryV3.sw .sw-theme-moon { position: absolute; top: 50%; transform: translateY(-50%); display: flex; transition: opacity .2s ease, color .2s ease; }
+#InventoryV3.sw .sw-theme-sun { left: 5px; color: #a06a0e; opacity: .8; }
+#InventoryV3.sw .sw-theme-moon { right: 5px; color: #6b6e98; opacity: .45; }
+#InventoryV3.sw.sw-dark .sw-theme-sun { opacity: .35; color: #cdd3ff; }
+#InventoryV3.sw.sw-dark .sw-theme-moon { opacity: 1; color: #f5d58a; }
+#InventoryV3.sw .sw-theme-knob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); transition: left .2s ease, background .2s ease; }
+#InventoryV3.sw.sw-dark .sw-theme-knob { left: 22px; background: #2d2a5e; }
+#InventoryV3.sw .sw-theme:hover .sw-theme-knob { filter: brightness(1.08); }
 
 /* Slots: rounded tiles with gaps, drawn behind the client's items. */
 #InventoryV3.sw .container { flex: none; width: var(--sw-w); height: var(--sw-h); padding: 0; margin: 0 -0px; border: 0; border-radius: 12px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--panel-ring), inset 0 2px 8px rgba(60,70,150,.1); white-space: normal; box-sizing: border-box; }
@@ -236,7 +249,9 @@ export default function windows(parameters, api) {
             <label class="sw-find">${ICON.search}<input type="text" placeholder="Search items" spellcheck="false" aria-label="Search items"></label>
             <button type="button" class="sw-btn sw-sort" title="Sort">${ICON.sort}<span></span></button>
             <button type="button" class="sw-btn sw-view"></button>
-            <button type="button" class="sw-btn sw-theme"></button>
+            <button type="button" class="sw-theme" role="switch" aria-checked="false">
+                <span class="sw-theme-sun">${ICON.sun}</span><span class="sw-theme-moon">${ICON.moon}</span><span class="sw-theme-knob"></span>
+            </button>
         </div>`, tabs.nextSibling);
         const search = tools.querySelector('input'), sortButton = tools.querySelector('.sw-sort'), viewButton = tools.querySelector('.sw-view'), themeButton = tools.querySelector('.sw-theme');
         const empty = add(container, '<div class="sw-empty">No items match</div>');
@@ -315,8 +330,8 @@ export default function windows(parameters, api) {
             sortButton.setAttribute('aria-pressed', String(prefs.sort !== 'game'));
             viewButton.innerHTML = prefs.view === 'list' ? ICON.grid : ICON.list;
             viewButton.title = prefs.view === 'list' ? 'Show as grid' : 'Show as list';
-            themeButton.innerHTML = prefs.dark ? ICON.sun : ICON.moon;
-            themeButton.title = prefs.dark ? 'Light theme' : 'Midnight theme';
+            themeButton.setAttribute('aria-checked', String(prefs.dark));
+            themeButton.title = prefs.dark ? 'Switch to light theme' : 'Switch to midnight theme';
         }
 
         function paintWeight() {
@@ -463,12 +478,69 @@ export default function windows(parameters, api) {
         SkillListV2: { setting: 'skills', css: SKILLS, classes: ['sw'] },
         PartyFriends: { setting: 'others', css: PARTY, classes: ['sw'] },
         Guild: { setting: 'others', css: GUILD, classes: ['sw'] },
+        NpcStore: { setting: 'others', css: NPCSTORE, classes: ['sw'] },
+        FPS: { setting: 'others', css: FPS, classes: ['sw'] },
+        // The client picks BasicInfoV4 below 4th class and BasicInfoV5 at 4th class,
+        // regardless of packetver (UIVersionManager.selectUIVersionWithJob), so both
+        // need the skin; BASICINFO's selectors cover both ids.
+        BasicInfoV4: { setting: 'basic', css: BASICINFO, classes: ['sw'], watch: watchBasic },
+        BasicInfoV5: { setting: 'basic', css: BASICINFO, classes: ['sw'], watch: watchBasic },
     };
     const plain = { setting: 'others', css: GENERIC, classes: ['swg'] };
     const specFor = id => SKINS[id] || (GENERIC_WINDOWS.has(id) ? plain : null);
     // The client puts each window inside a div.ui-component-root in the shadow root.
     const rootOf = component => { const box = component.root?.querySelector?.('.ui-component-root') || component.root; return [...(box?.children || [])].find(node => node.id) || null; };
     const skinned = new Map(); // host -> { style, win, classes }
+    // Basic Info: the game writes HP, SP, AP, exp, level and job as text. Copy them into
+    // CSS variables on the window, so the stylesheet can draw the bars and the badge.
+    let jobsLoad = null;
+    const jobIds = () => (jobsLoad ??= fetch(new URL('./jobs.json', import.meta.url)).then(r => r.json()).catch(() => ({})));
+    const jobIcons = new Map(); // job name -> promise of the icon's url, or null
+    const jobIcon = name => {
+        if (!jobIcons.has(name)) jobIcons.set(name, jobIds().then(ids => ids[name] === undefined ? null
+            : Promise.resolve(api.screens?.image?.(`renewalparty/icon_jobs_${ids[name]}.bmp`)).catch(() => null)).then(url => url || null, () => null));
+        return jobIcons.get(name);
+    };
+    const BASIC_VARS = ['--swb-hp', '--swb-sp', '--swb-ap', '--swb-lv', '--swb-job'];
+    const BASIC_CLASSES = ['swb-low', 'swb-ap', 'swb-noicon'];
+    function watchBasic(win) {
+        const text = selector => win.querySelector(selector)?.textContent?.trim() || '';
+        const count = selector => { const n = parseInt(text(selector).replace(/[^\d]/g, ''), 10); return Number.isFinite(n) ? n : 0; };
+        const share = (now, max) => max > 0 ? Math.max(0, Math.min(100, now * 100 / max)) : 0;
+        const set = (name, value) => { if (win.style.getPropertyValue(name) !== value) win.style.setProperty(name, value); };
+        let job = null, stopped = false;
+        function paint() {
+            const hp = share(count('.hp_value'), count('.hp_max_value'));
+            const apMax = count('.ap_max_value');
+            set('--swb-hp', hp.toFixed(1) + '%');
+            set('--swb-sp', share(count('.sp_value'), count('.sp_max_value')).toFixed(1) + '%');
+            set('--swb-ap', share(count('.ap_value'), apMax).toFixed(1) + '%');
+            set('--swb-lv', JSON.stringify(text('.blvl_value')));
+            const low = count('.hp_max_value') > 0 && hp < 25;
+            if (win.classList.contains('swb-low') !== low) win.classList.toggle('swb-low', low);
+            if (win.classList.contains('swb-ap') !== apMax > 0) win.classList.toggle('swb-ap', apMax > 0);
+            const name = text('.job_value');
+            if (name !== job) { job = name; showJob(name); }
+        }
+        // The job icon is the one the Party window uses, found from the job's name.
+        async function showJob(name) {
+            const url = await jobIcon(name);
+            if (stopped || name !== job) return;
+            if (url) { set('--swb-job', `url("${url}")`); win.classList.remove('swb-noicon'); }
+            else { win.style.removeProperty('--swb-job'); win.classList.add('swb-noicon'); }
+        }
+        const watch = new MutationObserver(records => { if (records.some(r => r.target !== win)) paint(); });
+        watch.observe(win, { subtree: true, childList: true, characterData: true });
+        paint();
+        return () => {
+            stopped = true;
+            watch.disconnect();
+            for (const name of BASIC_VARS) win.style.removeProperty(name);
+            win.classList.remove(...BASIC_CLASSES);
+            if (!win.style.length) win.removeAttribute('style');
+        };
+    }
+
     function retheme() { for (const { win } of skinned.values()) win.classList.toggle('sw-dark', prefs.dark); }
     function skin(component) {
         const win = rootOf(component), spec = win && specFor(win.id);
@@ -478,13 +550,14 @@ export default function windows(parameters, api) {
         style.textContent = spec.css;
         component.root.append(style);
         win.classList.add(...spec.classes);
-        skinned.set(component.host, { style, win, classes: spec.classes });
+        skinned.set(component.host, { style, win, classes: spec.classes, stop: spec.watch?.(win) });
         retheme();
     }
     function unskin(component) {
         const entry = skinned.get(component.host);
         if (!entry) return;
         entry.style.remove();
+        entry.stop?.();
         entry.win.classList.remove(...entry.classes, 'sw-dark');
         if (!entry.win.classList.length) entry.win.removeAttribute('class');
         skinned.delete(component.host);
@@ -492,19 +565,19 @@ export default function windows(parameters, api) {
 
     api.on('ui:append', component => {
         if (component.name === 'InventoryV3') { if (parameters?.inventory !== false) mount(component); }
-        else if (/^BasicInfo/.test(component.name)) bindBasic(component);
+        else if (/^BasicInfo/.test(component.name)) { bindBasic(component); skin(component); }
         else skin(component);
     });
     api.on('ui:remove', component => {
         if (component.name === 'InventoryV3') unmount(component);
-        else if (basic && component.host === basic.host) { basicWatch?.disconnect(); basicWatch = null; basic = null; repaintWeights(); }
+        else if (basic && component.host === basic.host) { basicWatch?.disconnect(); basicWatch = null; basic = null; repaintWeights(); unskin(component); }
         else unskin(component);
     });
 
     return () => {
         for (const entry of mounted.values()) entry.unmount();
         mounted.clear();
-        for (const { style, win, classes } of skinned.values()) { style.remove(); win.classList.remove(...classes, 'sw-dark'); }
+        for (const { style, win, classes, stop } of skinned.values()) { style.remove(); stop?.(); win.classList.remove(...classes, 'sw-dark'); }
         skinned.clear();
         basicWatch?.disconnect();
         basic = null;

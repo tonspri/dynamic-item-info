@@ -1,6 +1,6 @@
-# Dynamic Item Info v0.6.0
+# Dynamic Item Info v0.7.0
 
-Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status, Skill Tree, Party and Guild get the same look, with search, sort, a list view, a weight bar and a light or midnight theme, and every other game window gets the matching title bar and frame. Renewal and pre-renewal.
+Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status, Skill Tree, Party, Guild and Basic Info get the same look, with search, sort, a list view, a weight bar and a light or midnight theme, and every other game window gets the matching title bar and frame. Renewal and pre-renewal.
 
 ## How to use it
 Enable the mod, restart the game, then open any item's information as usual. There is nothing else to set up.
@@ -18,6 +18,7 @@ Enable the mod, restart the game, then open any item's information as usual. The
 - **Equipment (Alt+Q)**: pill tabs, worn items on rounded cards and named empty slots.
 - **Status**: stat names drawn as text on a clean panel and round + buttons.
 - **Skill Tree (Alt+S)**: pill tabs along the top and rounded skill cells, with raisable skills tinted.
+- **Basic Info**: your job badge with your base level on it, big HP and SP bars with the numbers inside (orange and breathing below 25% HP), base and job exp bars, and weight and zeny chips. The small mode is a compact strip with the badge and both bars. The menu opens from a handle and shows the game's buttons on rounded tiles.
 - **Party and Friends**: rounded member rows, a clean bar of buttons and Friends/Party pills.
 - **Guild (Alt+G)**: pill tabs, a cream panel and softer tables.
 - **Every other game window** (Storage, Quest, shops, trade, mail, world map and more): the blue title bar, round close button, rounded frame and slim scrollbar. Their insides stay the game's own.
