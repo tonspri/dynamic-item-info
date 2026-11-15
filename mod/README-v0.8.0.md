@@ -1,6 +1,6 @@
-# Dynamic Item Info v0.7.0
+# Dynamic Item Info v0.8.0
 
-Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status, Skill Tree, Party, Guild and Basic Info get the same look, with search, sort, a list view, a weight bar and a light or midnight theme, and every other game window gets the matching title bar and frame. Renewal and pre-renewal.
+Turns the item information window into clear sections: live stats, refine values now and at the next level, a labelled comparison with what you have equipped, the copies you carry and their restrictions, effects, random options, cards you can expand, and whether your level meets the requirements. Works on any item the game shows you, and keeps the game's own art, buttons and full description. The Inventory, Equipment, Status, Skill Tree, Party, Guild, Basic Info, the chat box, the skill bar and the Escape and settings menus get the same look, with search, sort, a list view, a weight bar and a light or midnight theme; the chat box is also resizable in width and stays translucent over gameplay. Every other game window gets the matching title bar and frame. Renewal and pre-renewal.
 
 ## How to use it
 Enable the mod, restart the game, then open any item's information as usual. There is nothing else to set up.
@@ -21,6 +21,9 @@ Enable the mod, restart the game, then open any item's information as usual. The
 - **Basic Info**: your job badge with your base level on it, big HP and SP bars with the numbers inside (orange and breathing below 25% HP), base and job exp bars, and weight and zeny chips. The small mode is a compact strip with the badge and both bars. The menu opens from a handle and shows the game's buttons on rounded tiles.
 - **Party and Friends**: rounded member rows, a clean bar of buttons and Friends/Party pills.
 - **Guild (Alt+G)**: pill tabs, a cream panel and softer tables.
+- **The chat box**: translucent glass that keeps the game showing through behind it, gold sender names (the rest of each line, and its own colour -- party, guild, system -- stays exactly as the game sends it), and a corner grip to resize its width, from 360 to 900px. Dragging the top edge of the log still resizes its height, the game's own way; the size and position are both remembered. Every tab, filter, command and keyboard shortcut works as before. The background's opacity is a setting.
+- **The skill bar**: larger tiles around the game's own icons, each slot's hotkey under it, and Rows buttons to show 1 to 4 rows. Drag-drop, hotkeys and cooldowns are the game's own.
+- **Escape menu, shortcut keys and Graphics Settings**: buttons as text, pill tabs, themed checkboxes, sliders and lists.
 - **Every other game window** (Storage, Quest, shops, trade, mail, world map and more): the blue title bar, round close button, rounded frame and slim scrollbar. Their insides stay the game's own.
 - **Light or midnight**: the moon and sun button in the Inventory switches every window. Windows that keep the game's insides only change their title bar.
 - Every click, drag and button works as in the game: using, equipping, dragging to hotkeys, right-click info, raising stats and skills. Each window can be turned back to the game's own in Settings.
@@ -40,5 +43,6 @@ The sections come from what the game already shows in the window, plus a small r
 - Requirements and details are recognized from English item text. With another language, more lines appear as plain text.
 - If the mod hits a problem with an item, that window goes back to the game's normal look.
 - The new windows apply to the windows of the app's default client version (Inventory from 2018, Status from 2020, Equipment from 2022). With an older client version chosen in Settings, those windows keep the game's look.
-- Buttons whose words are part of a picture (Apply, Reset, the equip switch buttons) stay the game's own.
+- A few buttons whose words are still part of a picture (the equip switch buttons) stay the game's own; Apply, Reset and the npc shop's Buy/Sell/Cancel/OK draw real text now.
+- The chat box's width-resize grip is ours; its vertical resize, by dragging the log's own top edge, is the game's. Width is remembered separately from the game's own saved height and position.
 - Weight per item comes from the item description; an item without a weight line shows none.

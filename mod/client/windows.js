@@ -1,4 +1,4 @@
-import { EQUIPMENT, STATUS, SKILLS, PARTY, GUILD, GENERIC, GENERIC_WINDOWS, BASICINFO, NPCSTORE, FPS } from './skins.js';
+import { EQUIPMENT, STATUS, SKILLS, PARTY, GUILD, GENERIC, GENERIC_WINDOWS, BASICINFO, NPCSTORE, FPS, CHATBOX, ESCAPE, SHORTCUTOPTION, GRAPHICSOPTION, SHORTCUT } from './skins.js';
 
 // Dynamic Item Info: the game's own windows in the same look as the item window.
 // A new Inventory, plus Equipment, Status, Skill Tree, Party, Guild and Basic Info.
@@ -470,6 +470,136 @@ export default function windows(parameters, api) {
         repaintWeights();
     }
 
+    // The chat box: a leading "Name : " on a plain-text message gets a gold span (the
+    // rest of the line, and its own colour, is left exactly as the game sets it), and
+    // a corner grip resizes width -- the client only ever resizes height, by dragging
+    // the log's own top edge, which this never touches.
+    const CHAT_NAME = /^([^\s:][^:\n]{0,23}?) : /;
+    function watchChat(win, component) {
+        const nameify = node => {
+            if (node.dataset.diiNamed || node.children.length) return;
+            const match = CHAT_NAME.exec(node.textContent);
+            if (!match) return;
+            node.dataset.diiNamed = '1';
+            node.textContent = node.textContent.slice(match[0].length);
+            node.insertBefore(document.createTextNode(' : '), node.firstChild);
+            const span = document.createElement('span');
+            span.className = 'dii-name';
+            span.textContent = match[1];
+            node.insertBefore(span, node.firstChild);
+        };
+        for (const node of win.querySelectorAll('.chat-message')) nameify(node);
+        const observer = new MutationObserver(records => {
+            for (const record of records) for (const node of record.addedNodes) {
+                if (node.nodeType !== 1) continue;
+                if (node.classList.contains('chat-message')) nameify(node);
+                else node.querySelectorAll?.('.chat-message').forEach(nameify);
+            }
+        });
+        observer.observe(win, { subtree: true, childList: true });
+
+        const grip = document.createElement('div');
+        grip.className = 'dii-chat-grip';
+        grip.title = 'Drag to resize';
+        win.appendChild(grip);
+        const saved = api.preferences?.get?.('chat', null);
+        const width = clamp(saved?.width ?? 600, [360, 900]);
+        component.host.style.width = `${width}px`;
+        const saveWidth = value => api.preferences?.set?.('chat', { ...(api.preferences?.get?.('chat', {}) || {}), width: value });
+        grip.addEventListener('pointerdown', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const host = component.host;
+            const scale = host.getBoundingClientRect().width / (host.offsetWidth || 1) || 1;
+            const start = { x: event.clientX, width: host.getBoundingClientRect().width / scale };
+            const left = host.getBoundingClientRect().left;
+            const move = next => {
+                const byScreen = Math.max(360, (window.innerWidth - left - 8) / scale);
+                const w = clamp(start.width + (next.clientX - start.x) / scale, [360, Math.min(900, byScreen)]);
+                host.style.width = `${w}px`;
+            };
+            const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); saveWidth(parseInt(host.style.width, 10)); };
+            window.addEventListener('pointermove', move);
+            window.addEventListener('pointerup', up);
+        });
+
+        return () => {
+            observer.disconnect();
+            grip.remove();
+            component.host.style.removeProperty('width');
+            if (!component.host.style.length) component.host.removeAttribute('style');
+        };
+    }
+
+    // The skill bar (ShortCut), as spacious tiles. The game keeps every slot, handler,
+    // drag-drop, hotkey and cooldown. Two things need help from here:
+    // - Rows: the game stores how many rows show as the window's inline height, 34px a
+    //   row (it saves `height / 34` and its hotkey cycles it). The tiles are taller than
+    //   34px, so the sheet sizes the window itself and reads the row count from that
+    //   inline height (data-rows), and the Rows pills and the resize grip write it back
+    //   in the game's own 34px form, so it is saved exactly as before.
+    // - Hotkeys: the game writes each slot's key into its tooltip ("[ F1 ] Heal", or
+    //   just "F1" on an empty slot), custom keys included; that is copied to data-dii-key
+    //   for the sheet to print under the tile.
+    const SC_ROW = 34;
+    function watchShortcut(win, component) {
+        const host = component.host;
+        const maxRows = () => win.querySelectorAll('.row').length || 4;
+        const rowsNow = () => clamp(Math.round((parseFloat(host.style.height) || 0) / SC_ROW), [0, maxRows()]);
+        const keyOf = slot => {
+            const tip = slot.getAttribute('data-tooltip') || '';
+            const m = /^\[ (.+?) \] /.exec(tip);
+            const key = m ? m[1] : (!slot.querySelector('.icon') ? tip : '');
+            return key.replace(/ \+ /g, '+').replace(/\b(ALT|CTRL|SHIFT)\b/g, s => s[0] + s.slice(1).toLowerCase());
+        };
+        const top = document.createElement('div');
+        top.className = 'dii-sc-top';
+        top.innerHTML = '<span class="dii-sc-label">Rows</span>' + [1, 2, 3, 4].slice(0, maxRows()).map(n => `<button type="button" class="dii-sc-rows" data-rows="${n}" title="Show ${n} row${n > 1 ? 's' : ''}">${n}</button>`).join('');
+        win.prepend(top);
+        const paint = () => {
+            const rows = String(rowsNow());
+            if (win.dataset.rows !== rows) win.dataset.rows = rows;
+            for (const b of top.querySelectorAll('.dii-sc-rows')) b.classList.toggle('on', b.dataset.rows === rows);
+            for (const slot of win.querySelectorAll('.container')) {
+                const key = keyOf(slot);
+                if ((slot.dataset.diiKey || '') !== key) { if (key) slot.dataset.diiKey = key; else delete slot.dataset.diiKey; }
+            }
+        };
+        const setRows = n => { host.style.height = `${n * SC_ROW}px`; };
+        const noDrag = event => { if (event.target.closest('.dii-sc-rows')) event.stopPropagation(); };
+        const pick = event => { const b = event.target.closest('.dii-sc-rows'); if (b) setRows(Number(b.dataset.rows)); };
+        top.addEventListener('mousedown', noDrag);
+        top.addEventListener('click', pick);
+        // The game's grip counts rows in 34px steps from the mouse; this one steps by the
+        // real (taller) row, and runs first so the game's never starts.
+        const grip = win.querySelector('.resize');
+        const resize = event => {
+            if (event.button !== 0) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const startY = event.clientY, start = Math.max(1, rowsNow());
+            const pitch = win.querySelector('.row')?.getBoundingClientRect().height || 47;
+            const move = next => setRows(clamp(start + Math.round((next.clientY - startY) / pitch), [1, maxRows()]));
+            const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+            window.addEventListener('mousemove', move);
+            window.addEventListener('mouseup', up);
+        };
+        grip?.addEventListener('mousedown', resize, true);
+        const watch = new MutationObserver(paint);
+        watch.observe(win, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-tooltip'] });
+        const hostWatch = new MutationObserver(paint);
+        hostWatch.observe(host, { attributes: true, attributeFilter: ['style'] });
+        paint();
+        return () => {
+            watch.disconnect();
+            hostWatch.disconnect();
+            grip?.removeEventListener('mousedown', resize, true);
+            top.remove();
+            delete win.dataset.rows;
+            for (const slot of win.querySelectorAll('.container')) delete slot.dataset.diiKey;
+        };
+    }
+
     // Every other game window: one stylesheet each, in the Inventory's theme. A
     // window is known by its root element's id, which the client's own template sets.
     const SKINS = {
@@ -480,6 +610,11 @@ export default function windows(parameters, api) {
         Guild: { setting: 'others', css: GUILD, classes: ['sw'] },
         NpcStore: { setting: 'others', css: NPCSTORE, classes: ['sw'] },
         FPS: { setting: 'others', css: FPS, classes: ['sw'] },
+        Escape: { setting: 'others', css: ESCAPE, classes: ['sw'] },
+        ShortCutOption: { setting: 'others', css: SHORTCUTOPTION, classes: ['sw'] },
+        GraphicsOption: { setting: 'others', css: GRAPHICSOPTION, classes: ['sw'] },
+        chatbox: { setting: 'chat', css: CHATBOX, classes: ['sw'], watch: watchChat },
+        ShortCut: { setting: 'skillbar', css: SHORTCUT, classes: ['sw'], watch: watchShortcut },
         // The client picks BasicInfoV4 below 4th class and BasicInfoV5 at 4th class,
         // regardless of packetver (UIVersionManager.selectUIVersionWithJob), so both
         // need the skin; BASICINFO's selectors cover both ids.
@@ -550,7 +685,8 @@ export default function windows(parameters, api) {
         style.textContent = spec.css;
         component.root.append(style);
         win.classList.add(...spec.classes);
-        skinned.set(component.host, { style, win, classes: spec.classes, stop: spec.watch?.(win) });
+        if (win.id === 'chatbox') win.style.setProperty('--chat-a', String(clamp(parameters?.chatOpacity ?? 65, [20, 95]) / 100));
+        skinned.set(component.host, { style, win, classes: spec.classes, stop: spec.watch?.(win, component) });
         retheme();
     }
     function unskin(component) {
@@ -560,6 +696,7 @@ export default function windows(parameters, api) {
         entry.stop?.();
         entry.win.classList.remove(...entry.classes, 'sw-dark');
         if (!entry.win.classList.length) entry.win.removeAttribute('class');
+        if (entry.win.id === 'chatbox') { entry.win.style.removeProperty('--chat-a'); if (!entry.win.style.length) entry.win.removeAttribute('style'); }
         skinned.delete(component.host);
     }
 

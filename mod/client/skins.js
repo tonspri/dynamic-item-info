@@ -257,9 +257,87 @@ ${F} .titlebar .fps-low span { color: var(--soft); }
 // instead. Buy, Sell, Cancel and OK draw their label into their own bitmap, so the
 // bitmap is hidden and the label is redrawn as real text.
 const N = '#NpcStore.sw';
+// The chat box: translucent glass, so gameplay stays visible behind it, unlike every
+// other window which sits on an opaque background. The game keeps every tab, filter,
+// command, keyboard shortcut and its own vertical (top-edge) resize; windows.js adds
+// a width grip of its own, since the client only ever resizes height. Each message's
+// own colour (party purple, guild teal, system yellow...) is left exactly as the game
+// sets it; only a leading "Name : " gets a gold tint, drawn by windows.js wrapping it
+// in a span, since the client writes the whole line as one block of plain text.
+const C = '#chatbox.sw';
+export const CHATBOX = THEME + `
+${C} { --chat-a: .65; font-family: "Segoe UI", system-ui, sans-serif; border-radius: 14px; overflow: hidden;
+    background: rgba(255,252,244,min(.97, calc(var(--chat-a) * .35 + .72))); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    box-shadow: 0 0 0 1px rgba(142,163,221,.55), 0 14px 34px rgba(36,44,96,.35); color: var(--ink); }
+/* Midnight: the opacity setting still applies, but never drops below ~70% so light
+   ground (snow, sand, Prontera stone) can't wash the log out to grey. */
+${C}.sw-dark { background: rgba(20,23,52,min(.95, calc(var(--chat-a) * .45 + .52))); box-shadow: 0 0 0 1px rgba(143,176,255,.3), 0 14px 34px rgba(0,0,0,.5); }
+/* Tabs keep the game's own box metrics (padding, 1px border, -1px overlap): the client
+   measures each tab from exactly these to size it, so any extra margin or wider font
+   here is what clipped the captions ("Ba..."). Only colour and shape change. */
+${C} .header .tab div { background: var(--chip) !important; background-clip: padding-box !important; color: var(--chip-ink); border-color: transparent !important; border-radius: 9px 9px 0 0; box-shadow: none; text-shadow: none; }
+${C} .header .tab div:hover { background: var(--chip-hover) !important; background-clip: padding-box !important; }
+${C} .header .tab div.on { background: var(--accent) !important; background-clip: padding-box !important; }
+${C} .header input { color: var(--chip-ink); text-shadow: none; cursor: pointer; }
+${C} .header .tab div.on input { color: var(--accent-ink); font-weight: normal; }
+${C} .header .options { border-bottom: 0; }
+${C} .chat-function button { border-radius: 4px; transition: filter .12s ease, transform .12s ease; }
+${C} .chat-function button:hover { filter: brightness(1.3); transform: scale(1.15); }
+${C} .body { background: none !important; border: 0 !important; }
+/* Breathing room: the game sets the log's line height inline (14px at 12px text, from
+   its font-scale menu), so this overrides it as a ratio that follows any font scale. */
+${C} .content { padding: 3px 12px 3px 10px !important; box-sizing: border-box; line-height: 1.42 !important; }
+${C} .content .chat-message { margin: 1px 0; }
+/* Light: "Paper" (the author's pick, 2026-11-15). Near-opaque cream (~95% at the
+   default setting, never below ~79%), and the game's message colours -- chosen for
+   its old black log (getColorForType: white, #00FF00, #FFFF63...) -- swapped for darker
+   tones of the same channel that read on cream. The game writes them inline, so they
+   are matched by the inline style the browser serializes. Midnight keeps the originals. */
+${C}:not(.sw-dark) .header { background: linear-gradient(#eef1fc, rgba(238,241,252,0)); }
+${C}:not(.sw-dark) .header .tab div { background: #e3e7f7 !important; background-clip: padding-box !important; }
+${C}:not(.sw-dark) .header .tab div:hover { background: #fff !important; background-clip: padding-box !important; }
+${C}:not(.sw-dark) .header .tab div.on { background: linear-gradient(#6d97ee, #3559bd) !important; background-clip: padding-box !important; }
+${C}:not(.sw-dark) .header input { color: #4a4d78; }
+${C}:not(.sw-dark) .header .tab div.on input { color: #fff; }
+${C}:not(.sw-dark) .contentwrapper { border-top: 1px solid #dde2f4; }
+${C}:not(.sw-dark) .content { color: #34365a; text-shadow: none; }
+${C}:not(.sw-dark) .chat-message { text-shadow: none !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: white"], ${C}:not(.sw-dark) .chat-message[style*="color: rgb(255, 255, 255)"] { color: #34365a !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(0, 255, 0)"] { color: #1f7a33 !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(230, 215, 200)"] { color: #8b3fb0 !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(200, 200, 100)"] { color: #6c3a96 !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(180, 255, 180)"] { color: #137a6a !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(255, 255, 0)"] { color: #b8590a !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(255, 0, 0)"] { color: #c2283f !important; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(255, 255, 99)"] { color: #6a5a00 !important; background: #fff4c2; border-radius: 4px; padding: 0 4px; margin-left: -4px; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(0, 255, 255)"] { color: #2f5bd0 !important; font-weight: 600; }
+${C}:not(.sw-dark) .chat-message[style*="color: rgb(244, 210, 147)"] { color: #8a5a12 !important; }
+${C}:not(.sw-dark) .content a, ${C}:not(.sw-dark) .content .item-link { color: #3559bd !important; text-shadow: none; }
+${C}:not(.sw-dark) .input { background: #fff !important; box-shadow: inset 0 0 0 1px #c6cdea; }
+${C}:not(.sw-dark) .input:focus-within { box-shadow: inset 0 0 0 2px #4f7fe0; }
+${C}:not(.sw-dark) .input .username, ${C}:not(.sw-dark) .input .message { color: #34365a; text-shadow: none; }
+${C}:not(.sw-dark) .input .message.party { color: #8b3fb0; }
+${C}:not(.sw-dark) .input .message.guild { color: #137a6a; }
+${C}:not(.sw-dark) .input .message.clan { color: #2f5bd0; }
+${C} .dii-name { color: var(--gold-ink); font-weight: 600; }
+${C} .input { background: var(--chip) !important; background-image: none !important; border-radius: 99px; margin: 4px 8px 8px; width: calc(100% - 16px); box-sizing: border-box; }
+${C} .input .username { color: var(--ink); left: 10px; }
+${C} .input .list { left: 103px; }
+${C} .input .wrapper { margin-left: 112px; }
+${C} .input .message { color: var(--ink); }
+${C} .input:focus-within { box-shadow: 0 0 0 2px var(--blue); }
+${C} .battlemode { background: var(--chip) !important; border: 0 !important; }
+/* The width grip windows.js adds -- the client only ever resizes height, by dragging
+   the strip along the message log's own top edge, which is left exactly as it was. */
+${C} .dii-chat-grip { position: absolute; right: 4px; bottom: 4px; width: 12px; height: 12px; cursor: ew-resize; opacity: .5; z-index: 5; transition: opacity .12s ease; }
+${C} .dii-chat-grip:hover { opacity: .9; }
+${C} .dii-chat-grip::before { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 38%, var(--soft) 38%, var(--soft) 54%, transparent 54%, transparent 68%, var(--soft) 68%, var(--soft) 84%, transparent 84%); }
+`;
+
 export const NPCSTORE = THEME + `
 ${N} { font-family: "Segoe UI", system-ui, sans-serif; }
-${N} .InputWindow, ${N} .OutputWindow, ${N} .AvailableItemsWindow, ${N} .PurchaseResult { border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px var(--ring), 0 10px 30px rgba(36,44,96,.42); }
+${N} .InputWindow, ${N} .OutputWindow, ${N} .AvailableItemsWindow, ${N} .PurchaseResult { background: var(--bg) !important; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px var(--ring), 0 10px 30px rgba(36,44,96,.42); }
 ${N} .titlebar { background: var(--title) !important; }
 ${N} .titlebar ui-image { display: none; }
 ${N} .titlebar .text { color: #fff; text-shadow: 0 1px 2px rgba(20,30,90,.6); font: 600 11px "Segoe UI", sans-serif; }
@@ -284,6 +362,166 @@ ${N} .btn.buy::after, ${N} .btn.sell::after, ${N} .btn.ok::after { color: var(--
 ${N} .btn.buy::after { content: "Buy"; } ${N} .btn.sell::after { content: "Sell"; } ${N} .btn.ok::after { content: "OK"; }
 ${N} .btn.cancel { background: var(--chip) !important; }
 ${N} .btn.cancel::after { content: "Cancel"; color: var(--chip-ink); }
+`;
+
+// Shared text button for windows whose buttons are bitmaps with the label baked in:
+// the bitmap (and its hover/down swaps, which the client sets as inline
+// background-image) is replaced, and the label drawn as real text.
+const textButton = (sel, label, primary) => `
+${sel} { background: ${primary ? 'var(--accent)' : 'var(--chip)'} !important; border: 0 !important; border-radius: 99px; cursor: pointer; position: absolute; color: transparent; font-size: 0;
+    box-shadow: 0 0 0 1px ${primary ? 'transparent' : 'var(--ring)'} inset; transition: transform .12s ease, filter .12s ease; }
+${sel}::after { content: "${label}"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap;
+    font: 600 11px "Segoe UI", sans-serif; color: ${primary ? 'var(--accent-ink)' : 'var(--chip-ink)'}; }
+${sel}:hover { filter: brightness(1.08); transform: translateY(-1px); }
+${sel}:active { filter: brightness(.94); transform: translateY(0); }
+${sel}:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }`;
+
+// The Escape menu ("Select Option"). Every button is a 221x20 bitmap with its label
+// baked in; each is redrawn with its own label as text. Buttons other mods add
+// (Huntcraft, Item Collection...) carry their name in aria-label, which is used the same
+// way; one without a name keeps its own picture. The game still shows/hides each button
+// (death menu: Resurrect / Save Point only), so nothing here touches display.
+const X = '#Escape.sw';
+const ESC_LABELS = { resurection: 'Resurrect', savepoint: 'Return to Save Point', charselect: 'Character Select', graphics: 'Graphics Settings', sound: 'Sound Settings', hotkey: 'Shortcut Keys', exit: 'Exit Game', cancel: 'Back to Game' };
+export const ESCAPE = THEME + `
+${X} { background: var(--bg) !important; border-radius: 14px; box-shadow: 0 0 0 1px var(--ring), 0 14px 34px rgba(36,44,96,.42); font-family: "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+${X} .top { height: 22px; background: var(--title); }
+${X} .top .node { display: none; }
+${X} .top .title { top: 0; left: 12px; line-height: 22px; color: #fff; text-shadow: 0 1px 2px rgba(20,30,90,.6); font: 600 12px/22px "Segoe UI", sans-serif; letter-spacing: .3px; }
+${X} .container { padding: 10px 30px 12px; display: flex; flex-direction: column; gap: 5px; }
+${X} .container button { position: relative; margin: 0; height: 26px; width: 220px; background: var(--chip) !important; border: 0; border-radius: 99px; cursor: pointer;
+    box-shadow: 0 0 0 1px var(--ring) inset; transition: background .12s ease, transform .12s ease, box-shadow .12s ease; }
+${X} .container button::after { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 600 12px "Segoe UI", sans-serif; color: var(--chip-ink); }
+${X} .container button:hover { background: var(--chip-hover) !important; transform: translateY(-1px); box-shadow: 0 0 0 1px var(--blue) inset, 0 3px 8px rgba(36,44,96,.18); }
+${X} .container button:active { transform: translateY(0); filter: brightness(.95); }
+${X} .container button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+${Object.entries(ESC_LABELS).map(([k, v]) => `${X} .container .${k}::after { content: "${v}"; }`).join('\n')}
+${X} .container .resurection, ${X} .container .cancel { background: var(--accent) !important; box-shadow: none; }
+${X} .container .resurection::after, ${X} .container .cancel::after { color: var(--accent-ink); }
+${X} .container .exit::after { color: #c2415d; }
+${X}.sw-dark .container .exit::after { color: #ff9db0; }
+${X} .container .hooked:not([aria-label]) { background-color: transparent !important; box-shadow: none; }
+${X} .container .hooked[aria-label] { background-image: none !important; }
+${X} .container .hooked[aria-label]::after { content: attr(aria-label); }
+`;
+
+// The shortcut key settings window (Escape -> Shortcut Keys). The game keeps every
+// handler: click a key cell, press a key, conflicts, Reset/OK/Cancel/Close. The four
+// tabs become pills; the key cells keep their meaning by colour (assignable, changed,
+// being captured) in theme tones instead of the game's pale yellow and pink.
+const O = '#ShortCutOption.sw';
+export const SHORTCUTOPTION = THEME + frame(O) + titlebar(O, 17) + `
+${O} { border: 0 !important; }
+${O} .titlebar { border-bottom: 0; }
+${O} .tabs { top: 0; border-right: 0; display: flex; gap: 4px; padding: 4px 8px 0; }
+${O} .tabs button { width: auto; min-width: 64px; height: 21px; padding: 0 10px; border: 0; border-radius: 99px; background: var(--chip); color: var(--chip-ink); font: 600 11px "Segoe UI", sans-serif; cursor: pointer;
+    box-shadow: 0 0 0 1px var(--ring) inset; transition: background .12s ease; }
+${O} .tabs button:hover { background: var(--chip-hover); }
+${O} .tabs button.selectedtab { background: var(--accent); color: var(--accent-ink); box-shadow: none; border: 0; }
+/* The window is a fixed 430x465 with absolutely placed footer buttons; the panel fills
+   it down to the bottom so the buttons sit inside it, and 18 key rows of 21px fit above them. */
+${O} .panel { position: absolute; top: 46px; left: 6px; right: 6px; bottom: 6px; border-top: 0; margin: 0; padding: 4px 6px; box-sizing: border-box; background: var(--panel); border-radius: 10px; box-shadow: 0 0 0 1px var(--panel-ring) inset; }
+${O}.sw-dark .panel { background: rgba(14,16,40,.55); }
+${O}.sw-dark { color-scheme: dark; }
+${O} .content table { color: var(--ink); border: 0; border-collapse: separate; border-spacing: 0 1px; font-size: 11px; }
+${O} .content table td { border: 0 !important; padding: 0; }
+${O} .content table tr { height: 20px; }
+${O} .content.t_gamepad { max-height: 362px; }
+${O} .content table td:nth-child(1), ${O} .content table td:nth-child(3) { color: var(--soft); text-align: right; padding-right: 8px; }
+${O} .content table td:nth-child(2), ${O} .content table td:nth-child(4) { background: var(--slot); border-radius: 6px; font-weight: 600; color: var(--ink); }
+${O} .content table td.customize { background: var(--slot); cursor: pointer; box-shadow: 0 0 0 1px var(--ring) inset; transition: background .12s ease; }
+${O} .content table td.customize:hover { background: var(--slot-hover); }
+${O} .content table td.changed { background: var(--up); color: var(--blue-deep); }
+${O} .content table td.selected { background: var(--pick); box-shadow: 0 0 0 2px var(--blue) inset; }
+${O} .content table tr.joySection td { background: var(--chip); color: var(--ink); border-radius: 6px; }
+${O} .joyBtn { border: 0; border-radius: 99px; background: var(--chip); color: var(--chip-ink); box-shadow: 0 0 0 1px var(--ring) inset; }
+${O} .joyBtn:hover { background: var(--chip-hover); }
+${O} .joyBtn.capturing { background: var(--pick); box-shadow: 0 0 0 2px var(--blue) inset; }
+${O} .joyValue, ${O} .joyCalibrateStatus { color: var(--soft); }
+${O} input[type=range], ${O} input[type=checkbox] { accent-color: var(--blue); }
+${O} .panel .button { height: 22px; bottom: 6px; }
+${O} .panel .button.reset { left: 6px; width: 50px; }
+${O} .panel .button.ok { right: 104px; width: 46px; }
+${O} .panel .button.cancel { right: 52px; width: 50px; }
+${O} .panel .button.close { right: 6px; width: 44px; }
+${textButton(`${O} .panel .button.reset`, 'Reset')}
+${textButton(`${O} .panel .button.ok`, 'OK', true)}
+${textButton(`${O} .panel .button.cancel`, 'Cancel')}
+${textButton(`${O} .panel .button.close`, 'Close')}
+`;
+
+// Graphics settings (Escape -> Graphics Settings): tabs, a table of labels, sliders,
+// checkboxes and selects. Native controls stay native (keyboard, dropdown lists,
+// Apply-on-change all the game's own); they're themed via accent-color and colours.
+const G = '#GraphicsOption.sw';
+export const GRAPHICSOPTION = THEME + frame(G) + titlebar(G, 17) + `
+${G} .tabs-container { padding: 6px 8px 0; }
+${G} .tabs { display: flex; gap: 4px; }
+${G} .tab-button { width: auto; min-width: 80px; height: 22px; padding: 0 12px; border: 0 !important; border-radius: 99px; background: var(--chip); color: var(--chip-ink); font: 600 11px "Segoe UI", sans-serif;
+    box-shadow: 0 0 0 1px var(--ring) inset; transition: background .12s ease; }
+${G} .tab-button:hover { background: var(--chip-hover); }
+${G} .tab-button.selected { background: var(--accent); color: var(--accent-ink); font-weight: 600; box-shadow: none; }
+${G} .panel { margin: 6px 8px 8px; padding: 6px 8px; background: var(--panel); border-radius: 10px; box-shadow: 0 0 0 1px var(--panel-ring) inset; color: var(--ink); font-size: 11px; }
+${G}.sw-dark .panel { background: rgba(14,16,40,.55); }
+${G}.sw-dark { color-scheme: dark; }
+${G} .panel table { border-spacing: 0 3px; }
+${G} .panel td:first-child { color: var(--soft); font-weight: 600; padding-right: 10px; white-space: nowrap; }
+${G} .panel label { color: var(--ink); cursor: pointer; }
+${G} input[type=checkbox], ${G} input[type=range], ${G} input[type=radio] { accent-color: var(--blue); cursor: pointer; }
+${G} input:disabled, ${G} select:disabled { opacity: .45; cursor: default; }
+${G} select { background: var(--chip); color: var(--ink); border: 0; border-radius: 8px; padding: 2px 6px; font: 11px "Segoe UI", sans-serif; box-shadow: 0 0 0 1px var(--ring) inset; cursor: pointer; }
+${G} select:hover { background: var(--chip-hover); }
+${G} select:focus-visible, ${G} .tab-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+${G}.sw-dark select { color-scheme: dark; background: #2a2f63; }
+${G} .reset-button { background: linear-gradient(#e7748b, #c2415d); border: 0; border-radius: 99px; padding: 4px 12px; font: 600 11px "Segoe UI", sans-serif; transition: filter .12s ease; }
+${G} .reset-button:hover { filter: brightness(1.08); }
+`;
+
+// The skill bar, option 2 "Spacious tiles" (the author's pick, 2026-11-15): 32px tiles
+// around the game's own 24px icons (not scaled, so they stay sharp), the hotkey under
+// each tile, a row number at the start of each row, and Rows 1-4 plus close on top.
+// windows.js sets data-rows from the game's own row count and data-dii-key from each
+// slot's tooltip; the game's cooldown overlay, amount, drag-drop and tooltip stay.
+const SC = '#ShortCut.sw';
+export const SHORTCUT = THEME + `
+:host { width: 372px !important; height: auto !important; overflow: visible !important; }
+${SC} { position: relative; width: auto; height: auto; padding: 6px 10px 3px; box-sizing: border-box; background: var(--bg) !important; border-radius: 14px;
+    box-shadow: 0 0 0 1px var(--ring), 0 10px 24px rgba(36,44,96,.35); font-family: "Segoe UI", system-ui, sans-serif; color: var(--ink); }
+${SC}[data-rows="0"] { display: none; }
+${SC}[data-rows="1"] .row:nth-child(n+2 of .row), ${SC}[data-rows="2"] .row:nth-child(n+3 of .row), ${SC}[data-rows="3"] .row:nth-child(n+4 of .row) { display: none; }
+${SC} .dii-sc-top { display: flex; align-items: center; gap: 4px; height: 18px; margin: 0 24px 5px 0; font: 600 10px "Segoe UI", sans-serif; color: var(--chip-ink); cursor: default; }
+${SC} .dii-sc-label { margin-right: 2px; letter-spacing: .3px; }
+${SC} .dii-sc-rows { min-width: 20px; height: 16px; padding: 0 6px; border: 0; border-radius: 99px; background: var(--chip); color: var(--chip-ink); font: 600 10px "Segoe UI", sans-serif; cursor: pointer;
+    box-shadow: 0 0 0 1px var(--ring) inset; transition: background .12s ease; }
+${SC} .dii-sc-rows:hover { background: var(--chip-hover); }
+${SC} .dii-sc-rows.on { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
+${SC} .dii-sc-rows:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+${SC} .close { top: 7px; right: 9px; width: 16px; height: 16px; border-radius: 50%; background: rgba(53,89,189,.16) !important; cursor: pointer; transition: background .12s ease; }
+${SC} .close::before { content: "\\00d7"; position: absolute; inset: 0; color: var(--blue-deep); font: 700 12px/16px "Segoe UI", sans-serif; text-align: center; }
+${SC} .close:hover { background: rgba(53,89,189,.3) !important; }
+${SC}.sw-dark .close { background: rgba(255,255,255,.12) !important; }
+${SC}.sw-dark .close::before { color: #fff; }
+${SC} .resize { bottom: 3px; right: 3px; width: 12px; height: 12px; background: none !important; cursor: ns-resize; opacity: .55; }
+${SC} .resize:hover { opacity: .9; }
+${SC} .resize::before { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 38%, var(--soft) 38%, var(--soft) 54%, transparent 54%, transparent 68%, var(--soft) 68%, var(--soft) 84%, transparent 84%); }
+${SC} .row { display: flex; align-items: flex-start; gap: 5px; height: 47px; }
+${SC} .row .clear { display: none; }
+${SC} .row .index { order: -1; float: none; position: static; flex: none; width: 14px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; background: var(--chip); color: var(--soft); font: 700 9px "Segoe UI", sans-serif; }
+${SC} .row .container { float: none; flex: none; position: relative; margin: 0; width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    background: #fffdf6; box-shadow: 0 0 0 1.5px var(--ring), 0 2px 4px rgba(36,44,96,.15); transition: box-shadow .12s ease, background .12s ease; }
+${SC}.sw-dark .row .container { background: rgba(255,255,255,.07); box-shadow: 0 0 0 1.5px var(--ring); }
+${SC} .row .container:hover { background: #fff; box-shadow: 0 0 0 2px var(--blue), 0 0 10px rgba(79,127,224,.5); }
+${SC}.sw-dark .row .container:hover { background: rgba(255,255,255,.14); box-shadow: 0 0 0 2px #f3c063, 0 0 10px rgba(243,192,99,.5); }
+${SC} .row .container::after { content: attr(data-dii-key); position: absolute; top: 34px; left: -3px; right: -3px; text-align: center; pointer-events: none;
+    font: 700 9px/11px "Segoe UI", sans-serif; color: var(--chip-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+${SC} .icon { width: 24px; height: 24px; }
+${SC} .icon .img { display: block; }
+${SC} .icon .amount { top: auto; bottom: -6px; right: -6px; font: 700 10px "Segoe UI", sans-serif; color: var(--ink); text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 2px #fff; }
+${SC}.sw-dark .icon .amount { color: #fff; text-shadow: 0 1px 2px #000, 0 0 2px #000; }
+${SC} .icon .cooldown-overlay { top: -4px; left: -4px; width: 32px; height: 32px; border-radius: 9px; }
+${SC} .shortcut-tooltip { background: rgba(20,23,52,.94); color: #fff; text-shadow: none; border-radius: 8px; padding: 3px 9px; font: 600 11px "Segoe UI", sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
 `;
 
 // Every other client window: only the frame and title bar, so nothing inside moves.
@@ -311,9 +549,9 @@ export const GENERIC = `
 // the windows whose titlebar element wraps the whole window (Quest, Quest info,
 // attendance, party helper, NPC shop) or that have none at the top.
 export const GENERIC_WINDOWS = new Set(`Bank CaptchaAnswer CaptchaPreview CaptchaSelector CaptchaUpload CardIllustration CashShop ChatBoxSettings ChatRoom ChatRoomCreate Clan ConvertItems
-    Emoticons Enchant EnchantGrade EquipmentV0 EquipmentV1 EquipmentV2 EquipmentV3 GraphicsOption GuildCompanion InventoryV0 InventoryV1
+    Emoticons Enchant EnchantGrade EquipmentV0 EquipmentV1 EquipmentV2 EquipmentV3 GuildCompanion InventoryV0 InventoryV1
     InventoryV2 ItemListWindowSelection ItemPreview ItemReform LaphineSys LaphineUpg Mail MakeModelMessage MakeReadBook MemorialDungeon PetEvolution PetInformations
-    Pincodewindow ReadMail ReadRodex Refine Reputation Rodex Roulette ShortCutOption ShortCuts SoundOption Storage StorageFilter
+    Pincodewindow ReadMail ReadRodex Refine Reputation Rodex Roulette ShortCuts SoundOption Storage StorageFilter
     Stylist SwitchEquip Trade VendingModelMessage VendingReport WorldMap WriteRodex cartdecoration cartitems changecart vending vendingshop`.split(/\s+/).filter(Boolean));
 
 

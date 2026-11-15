@@ -30,7 +30,7 @@ const check = async (label, fn) => { await fn(); results.push(label); };
         for (const [folder, era] of [[manifest.renewalFolder, 'renewal'], [manifest.prerenewalFolder, 'pre-renewal']])
             assert(read(`${folder}/npc/dynamic-item-info-era-v${VERSION}.txt`).includes(`$@DII_era$ = "${era}";`));
         assert(fs.existsSync(`RELEASE-NOTES-v${VERSION}.md`));
-        assert.deepEqual(manifest.settings.map(s => s.key), ['inventory', 'equipment', 'skills', 'basic', 'others', 'dark']);
+        assert.deepEqual(manifest.settings.map(s => s.key), ['inventory', 'equipment', 'skills', 'basic', 'others', 'chat', 'chatOpacity', 'skillbar', 'dark']);
         assert.equal(typeof plugin.default, 'function');
     });
 

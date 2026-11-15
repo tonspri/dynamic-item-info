@@ -1,6 +1,6 @@
 # Dynamic Item Info
 
-A mod for [Ragnarok Offline](https://github.com/Flux159/ragnarokoffline.app) that turns the item information window into clear sections: live stats, refine values, a labelled comparison with what you have equipped, the copies you carry, restrictions, effects, random options and cards you can expand. The Inventory, Equipment, Status, Skill Tree, Party, Guild and Basic Info windows get the same look, with search, sort, a list view, a weight bar and a light or midnight theme; the NPC shop and the FPS counter get a skin of their own, and every other game window gets the matching title bar and frame. Works in renewal and pre-renewal, on a normal player account.
+A mod for [Ragnarok Offline](https://github.com/Flux159/ragnarokoffline.app) that turns the item information window into clear sections: live stats, refine values, a labelled comparison with what you have equipped, the copies you carry, restrictions, effects, random options and cards you can expand. The Inventory, Equipment, Status, Skill Tree, Party, Guild, Basic Info, chat box and skill bar get the same look, with search, sort, a list view, a weight bar and a light or midnight theme; the NPC shop, the FPS counter, the Escape menu and its settings windows get a skin of their own, and every other game window gets the matching title bar and frame. Works in renewal and pre-renewal, on a normal player account.
 
 ## What is here
 
@@ -8,8 +8,8 @@ A mod for [Ragnarok Offline](https://github.com/Flux159/ragnarokoffline.app) tha
 |---|---|
 | `mod/` | The mod exactly as it ships |
 | `mod/client/index.js` | The window layer, and the logic that reads the window and works out the rows |
-| `mod/client/windows.js` | The new Inventory, and the wiring for the other game windows |
-| `mod/client/skins.js` | The Equipment, Status, Skill Tree, Party, Guild, Basic Info, NPC shop and FPS styles, and the frame for every other window |
+| `mod/client/windows.js` | The new Inventory, and the wiring for the other game windows (Basic Info numbers, chat names and width, skill bar rows and hotkeys) |
+| `mod/client/skins.js` | The Equipment, Status, Skill Tree, Party, Guild, Basic Info, NPC shop, FPS, chat box, skill bar, Escape, shortcut key and Graphics Settings styles, and the frame for every other window |
 | `mod/client/jobs.json` | Job name to job icon id, generated from the client's own job table |
 | `mod/client/refine.json` | Refine bonuses for each era, generated from rAthena's `db/re/refine.yml` and `db/pre-re/refine.yml` |
 | `mod/npc/` | The read-only server script |
@@ -29,7 +29,7 @@ Each release is built by this repository's workflow from the commit it names, af
 
 ## Limits
 
-See the [mod's README](mod/README-v0.7.0.md#known-limits).
+See the [mod's README](mod/README-v0.8.0.md#known-limits).
 
 ## License
 

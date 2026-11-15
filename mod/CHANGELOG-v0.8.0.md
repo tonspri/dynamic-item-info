@@ -1,3 +1,13 @@
+# v0.8.0
+- The chat box is in the new look: translucent glass so gameplay stays visible, gold sender names, and a corner grip to resize its width (360-900px). Every tab, filter, command and keyboard shortcut still works, and the game's own vertical resize is untouched.
+- Light theme chat is near-opaque cream, and every message colour the game uses (party, guild, whispers, system, errors...) is swapped for a darker tone of the same channel that reads on it. Midnight keeps the game's own colours on a navy that stays readable over bright ground.
+- More room in the chat: more line spacing and wider margins. Tab names no longer get cut off.
+- New setting for the chat box's background opacity.
+- New setting to keep the game's own chat box.
+- The skill bar is in the new look: larger tiles around the same sharp icons, each slot's hotkey under it (your custom keys too), a row number on each row, and Rows 1-4 buttons. Drag-drop, hotkeys, cooldowns, item counts and the close and resize buttons work as before, and the number of rows is saved the game's own way. New setting to keep the game's own skill bar.
+- The Escape menu, the shortcut key window and Graphics Settings match the theme: every button reads as text, the tabs are pills, and checkboxes, sliders and lists take the theme colours. Buttons other mods add to the Escape menu show their own name.
+- Fixed: the NPC shop's panels were see-through in the midnight theme.
+
 # v0.7.0
 - Basic Info in the new look: job badge with your level, big HP and SP bars with numbers, exp bars, weight and zeny chips, and a compact small mode.
 - The Basic Info menu opens from a handle, with the game's buttons on rounded tiles.
